@@ -22,9 +22,9 @@ window.CODER_CATALOG = [
 
   /* ===== 前端小遊戲 ===== */
   { id: 'breakout', category: 'game', title: '打磚塊遊戲', description: '經典打磚塊小遊戲', platform: 'web',
-    contentUrl: 'games/breakout/index.html' },
+    contentUrl: 'games/breakout/index.html', thumbnail: 'media/thumbs/breakout.jpg' },
   { id: 'tennis', category: 'game', title: '網球小遊戲', description: '3D 黑貓網球挑戰賽', platform: 'web',
-    contentUrl: 'games/tennis/index.html' },
+    contentUrl: 'games/tennis/index.html', thumbnail: 'media/thumbs/tennis.jpg' },
 
   /* ===== 虛擬實境（linkOnly = 點擊後在新分頁開啟外部連結，不嵌入） ===== */
   { id: 'ling-yang-xia-gu', category: 'vr', title: '羚羊峽谷', platform: 'web', subtype: 'webxr', linkOnly: true, linkLabel: 'Makar VR',

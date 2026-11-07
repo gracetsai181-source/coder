@@ -14,6 +14,7 @@
     <!-- 網站設定檔（Google Apps Script 網址） -->
     <script src="config.js"></script>
 <script src="catalog.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -189,7 +190,7 @@
                 </div>
                 <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <work-card v-for="w in listFor(s.key)" :key="w.id" :work="w" :is-admin="isAdmin"
-                        @open="openWork(w)" @edit="openWorkModal(w.category, w)" @toggle="toggleStatus(w)" @remove="askDelete(w)"></work-card>
+                        @open="openWork(w)" @edit="openWorkModal(w.category, w)" @toggle="toggleStatus(w)" @remove="askDelete(w)" @move="moveWork(w, $event)"></work-card>
                 </div>
             </section>
 
@@ -527,6 +528,29 @@
         </div>
     </div>
 
+    <!-- ============ 外部連結作品（Makar App 等） ============ -->
+    <div v-if="activeLink" class="fixed inset-0 bg-black/90 z-[60] overflow-y-auto backdrop-blur-md">
+        <button @click="closeLinkModal" class="fixed top-4 right-5 text-white hover:text-cyan-300 text-3xl transition-colors z-10" aria-label="關閉"><i class="fa-solid fa-xmark"></i></button>
+        <div class="min-h-full flex items-center justify-center px-4 pt-14 pb-8" @click.self="closeLinkModal">
+            <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden text-white">
+                <img v-if="safeHttp(activeLink.thumbnail)" :src="safeHttp(activeLink.thumbnail)" :alt="activeLink.title" referrerpolicy="no-referrer" class="w-full aspect-video object-cover" @error="$event.target.style.display='none'">
+                <div class="p-5 space-y-3">
+                    <div>
+                        <div class="text-[11px] text-cyan-300 font-bold mb-1"><i class="fa-solid fa-vr-cardboard mr-1"></i>{{ activeLink.linkLabel || '外部連結' }}</div>
+                        <h2 class="text-xl font-bold break-words">{{ activeLink.title }}</h2>
+                        <p v-if="activeLink.description" class="text-slate-400 text-sm mt-1 break-words">{{ activeLink.description }}</p>
+                    </div>
+                    <div v-if="hasQr" class="flex flex-col items-center gap-2 bg-white rounded-2xl p-3">
+                        <div id="linkQr"></div>
+                        <p class="text-[11px] text-slate-600 text-center">用手機掃描，在手機上開啟</p>
+                    </div>
+                    <a :href="activeLink.contentUrl" target="_blank" rel="noopener noreferrer" class="block text-center bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2.5 rounded-full text-sm font-bold"><i class="fa-solid fa-up-right-from-square mr-1.5"></i>在這台裝置開啟連結</a>
+                    <p class="text-[11px] text-slate-500">此作品需在手機安裝 Makar App 後播放。電腦瀏覽器只會看到轉址頁，請改用手機掃描上方 QR Code。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ============ 音樂播放器（MP3） ============ -->
     <div v-if="activeMusic" class="fixed inset-0 bg-black/90 z-[60] overflow-y-auto backdrop-blur-md">
         <button @click="closeMusicPlayer" class="fixed top-4 right-5 text-white hover:text-rose-400 text-3xl transition-colors z-10" aria-label="關閉"><i class="fa-solid fa-xmark"></i></button>
@@ -823,7 +847,7 @@
 
     const WorkCard = {
         props: ['work', 'isAdmin'],
-        emits: ['open', 'edit', 'toggle', 'remove'],
+        emits: ['open', 'edit', 'toggle', 'remove', 'move'],
         setup(props) {
             const t = computed(() => THEME[props.work.category] || THEME.anime);
             const badge = computed(() => {
@@ -857,13 +881,17 @@
                     <h3 class="font-bold text-slate-100 transition-colors line-clamp-1" :class="t.title" :title="work.title">{{ work.title }}</h3>
                     <p class="text-xs text-slate-400 mt-1 line-clamp-2">{{ work.description || '點擊開啟作品。' }}</p>
                 </div>
-                <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-800/80 text-xs text-slate-500">
+                <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-800/80 text-xs text-slate-500">
                     <span>{{ dateText ? '發布於 ' + dateText : '' }}</span>
-                    <span v-if="isAdmin && work.fixed" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" title="預設作品放在網站檔案內，無法從後台修改">預設作品</span>
-                    <div v-else-if="isAdmin" class="flex items-center gap-1.5" @click.stop>
-                        <button @click="$emit('toggle')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300" :title="work.status === 'published' ? '下架（改為未公開）' : '上架（公開）'"><i class="fa-solid" :class="work.status === 'published' ? 'fa-eye-slash' : 'fa-eye'"></i></button>
-                        <button @click="$emit('edit')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300" title="編輯"><i class="fa-solid fa-pen"></i></button>
-                        <button @click="$emit('remove')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-red-600 text-red-300 hover:text-white" title="刪除"><i class="fa-solid fa-trash-can"></i></button>
+                    <div v-if="isAdmin" class="flex items-center gap-1.5 ml-auto" @click.stop>
+                        <button @click="$emit('move', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300" title="往前移（調整順序）"><i class="fa-solid fa-arrow-left"></i></button>
+                        <button @click="$emit('move', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300" title="往後移（調整順序）"><i class="fa-solid fa-arrow-right"></i></button>
+                        <span v-if="work.fixed" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" title="預設作品放在網站檔案內，無法修改或刪除，但可以調整順序">預設作品</span>
+                        <template v-else>
+                            <button @click="$emit('toggle')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300" :title="work.status === 'published' ? '下架（改為未公開）' : '上架（公開）'"><i class="fa-solid" :class="work.status === 'published' ? 'fa-eye-slash' : 'fa-eye'"></i></button>
+                            <button @click="$emit('edit')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300" title="編輯"><i class="fa-solid fa-pen"></i></button>
+                            <button @click="$emit('remove')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-red-600 text-red-300 hover:text-white" title="刪除"><i class="fa-solid fa-trash-can"></i></button>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -944,7 +972,7 @@
                 loading.value = true; loadError.value = '';
                 try {
                     const data = isAdmin.value ? await api('adminList', {}, true) : await api('bootstrap');
-                    works.value = withCatalog(data.works);
+                    works.value = withCatalog(absorbOrder(data.works));
                     comments.value = data.comments || [];
                     applyConfig(data.config);
                     lastSync.value = Date.now();
@@ -957,12 +985,67 @@
             };
 
             /* ---------- 作品列表 ---------- */
-            const listFor = (cat) => {
-                const q = searchQuery.value.trim().toLowerCase();
+            /* 排序：每個分類的順序存成 Sheets 裡一筆 title 為 __order__分類 的隱藏紀錄（description 放作品代號清單）。
+               沒有排序紀錄的作品（例如剛新增的）排在最前面，其餘依管理員設定的順序。 */
+            const ORDER_PREFIX = '__order__';
+            const orderMap = ref({});
+            const orderRec = ref({});
+            const ordering = ref(false);
+            const isOrderRec = (w) => String((w && w.title) || '').startsWith(ORDER_PREFIX);
+            const orderKey = (w) => (w.fixed ? String(w.id).replace(/^preset-/, '') : w.id);
+            const absorbOrder = (list) => {
+                const map = {}, rec = {};
+                (list || []).filter(isOrderRec).forEach(r => {
+                    const cat = String(r.title).slice(ORDER_PREFIX.length);
+                    rec[cat] = r.id;
+                    map[cat] = String(r.description || '').split(',').map(x => x.trim()).filter(Boolean);
+                });
+                orderMap.value = map; orderRec.value = rec;
+                return (list || []).filter(w => !isOrderRec(w));
+            };
+            const orderedFor = (cat) => {
+                const ord = orderMap.value[cat] || [];
                 return works.value
                     .filter(w => w.category === cat && (isAdmin.value || w.status === 'published'))
-                    .filter(w => !q || (w.title || '').toLowerCase().includes(q) || (w.description || '').toLowerCase().includes(q))
-                    .sort((a, b) => b.createdAt - a.createdAt);
+                    .sort((a, b) => {
+                        const ia = ord.indexOf(orderKey(a)), ib = ord.indexOf(orderKey(b));
+                        if (ia < 0 && ib < 0) return b.createdAt - a.createdAt;
+                        if (ia < 0) return -1;
+                        if (ib < 0) return 1;
+                        return ia - ib;
+                    });
+            };
+            const listFor = (cat) => {
+                const q = searchQuery.value.trim().toLowerCase();
+                return orderedFor(cat)
+                    .filter(w => !q || (w.title || '').toLowerCase().includes(q) || (w.description || '').toLowerCase().includes(q));
+            };
+            const saveOrder = async (cat, keys) => {
+                const csv = keys.join(',');
+                if (csv.length > 480) return showToast('此分類作品太多，排序資料超出上限', 'error');
+                const prev = orderMap.value[cat];
+                orderMap.value = Object.assign({}, orderMap.value, { [cat]: keys });   // 先更新畫面，失敗再還原
+                const recId = orderRec.value[cat] || '';
+                const payload = { id: recId, category: cat, title: ORDER_PREFIX + cat, description: csv, thumbnail: '', platform: 'web',
+                                  contentUrl: 'https://coder.invalid/order', embedUrl: '', status: 'published', subtype: '', aspect: '' };
+                ordering.value = true;
+                try {
+                    const saved = await api(recId ? 'updateWork' : 'createWork', { work: payload }, true);
+                    if (saved && saved.id) orderRec.value = Object.assign({}, orderRec.value, { [cat]: saved.id });
+                } catch (e) {
+                    orderMap.value = Object.assign({}, orderMap.value, { [cat]: prev });
+                    adminFail(e);
+                } finally { ordering.value = false; }
+            };
+            const moveWork = async (w, dir) => {
+                if (!isAdmin.value || ordering.value) return;
+                if (searchQuery.value.trim()) return showToast('調整順序前，請先清除搜尋欄', 'error');
+                const list = orderedFor(w.category);
+                const i = list.findIndex(x => x.id === w.id), j = i + dir;
+                if (i < 0 || j < 0 || j >= list.length) return;
+                const keys = list.map(orderKey);
+                [keys[i], keys[j]] = [keys[j], keys[i]];
+                await saveOrder(w.category, keys);
             };
 
             const SECTIONS = [
@@ -1002,12 +1085,20 @@
             const switchTab = (tab) => { activeTab.value = tab; };
             const scrollToGuestbook = () => { const el = document.getElementById('section-guestbook'); if (el) el.scrollIntoView({ behavior: 'smooth' }); };
 
+            /* ---------- 外部連結作品（Makar App 等）：說明視窗 + QR Code ---------- */
+            const activeLink = ref(null);
+            const hasQr = ref(false);
+            const openLinkModal = (w) => {
+                activeLink.value = w; hasQr.value = !!window.QRCode; document.body.style.overflow = 'hidden';
+                trackEvent('open_external_work', { title: w.title, work_id: w.id, content_type: w.category });
+                nextTick(() => {
+                    const el = document.getElementById('linkQr');
+                    if (el && window.QRCode) { el.innerHTML = ''; try { new window.QRCode(el, { text: w.contentUrl, width: 176, height: 176, correctLevel: window.QRCode.CorrectLevel.M }); } catch (e) { hasQr.value = false; } }
+                });
+            };
+            const closeLinkModal = () => { activeLink.value = null; document.body.style.overflow = 'auto'; };
             const openWork = (w) => {
-                if (w.linkOnly) {   // 預設作品中無法嵌入的外部連結：直接在新分頁開啟
-                    trackEvent('open_external_work', { title: w.title, work_id: w.id, content_type: w.category });
-                    window.open(w.contentUrl, '_blank', 'noopener,noreferrer');
-                    return;
-                }
+                if (w.linkOnly) { openLinkModal(w); return; }   // 無法嵌入的外部連結（例如 Makar App）：顯示說明與 QR Code
                 if (w.category === 'game') openGameModal(w);
                 else if (w.category === 'vr') openVrModal(w);
                 else if (w.category === 'music') openMusicPlayer(w);
@@ -1573,6 +1664,7 @@
                         if (confirmState.value) confirmState.value = null;
                         else if (activeVideo.value) closeVideoPlayer();
                         else if (activeMusic.value) closeMusicPlayer();
+                        else if (activeLink.value) closeLinkModal();
                         else if (activeGame.value) closeGameModal();
                         else if (activeVr.value) closeVrModal();
                     }
@@ -1585,6 +1677,7 @@
                 confirmState, runConfirm,
                 showWorkModal, savingWork, workForm, needsUrl, thumbTouched, openWorkModal, onUrlInput, saveWork, toggleStatus, askDelete,
                 activeVideo, openVideoPlayer, closeVideoPlayer,
+                moveWork, activeLink, hasQr, closeLinkModal,
                 activeMusic, musicError, musicList, musicIndex, openMusicPlayer, closeMusicPlayer, musicStep, onMusicEnded,
                 activeGame, activeGameKey, currentScore, highScores, gameCanvas, closeGameModal, restartMiniGame,
                 handleCanvasMouseMove, handleCanvasTouchMove, memoryCards, flipMemoryCard, memoryGameWon, bossState, attackBoss,
