@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coder之影音沉浸世界｜動畫・前端小遊戲・虛擬實境多媒體互動平台</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0b0f19">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Coder影音">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Google tag：只建立 gtag 函式，真正載入 gtag.js 由程式在取得 GA4 評估 ID 後動態處理（避免重複載入） -->
     <script>
@@ -76,7 +84,7 @@
                 </a>
                 <div class="hidden lg:flex items-center gap-1 text-sm font-bold bg-slate-800/70 p-1 rounded-full border border-slate-700/60">
                     <button @click="switchTab('all')" :class="activeTab === 'all' ? 'bg-brand text-white shadow' : 'text-slate-300 hover:text-white'" class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5"><i class="fa-solid fa-compass"></i> 探索全部</button>
-                    <button @click="switchTab('anime')" :class="activeTab === 'anime' ? 'bg-brand text-white shadow' : 'text-slate-300 hover:text-white'" class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5"><i class="fa-solid fa-film"></i> 動畫影片</button>
+                    <button @click="switchTab('anime')" :class="activeTab === 'anime' ? 'bg-brand text-white shadow' : 'text-slate-300 hover:text-white'" class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5"><i class="fa-solid fa-film"></i> 動畫與影音</button>
                     <button @click="switchTab('game')" :class="activeTab === 'game' ? 'bg-emerald-600 text-white shadow' : 'text-slate-300 hover:text-white'" class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5"><i class="fa-solid fa-gamepad"></i> 前端小遊戲</button>
                     <button @click="switchTab('vr')" :class="activeTab === 'vr' ? 'bg-cyan-600 text-white shadow' : 'text-slate-300 hover:text-white'" class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5"><i class="fa-solid fa-vr-cardboard"></i> 虛擬實境</button>
                     <button @click="switchTab('music')" :class="activeTab === 'music' ? 'bg-rose-600 text-white shadow' : 'text-slate-300 hover:text-white'" class="px-4 py-1.5 rounded-full transition-all flex items-center gap-1.5"><i class="fa-solid fa-music"></i> 音樂</button>
@@ -86,7 +94,7 @@
 
             <div class="flex items-center gap-3">
                 <div class="relative hidden sm:block">
-                    <input v-model="searchQuery" type="text" placeholder="搜尋動畫、遊戲、VR..." class="bg-slate-800/90 text-sm rounded-full py-1.5 pl-4 pr-9 focus:outline-none focus:ring-2 focus:ring-brand text-white w-48 md:w-60 border border-slate-700 placeholder-slate-400">
+                    <input v-model="searchQuery" type="text" placeholder="搜尋動畫與影音、遊戲、VR、音樂..." class="bg-slate-800/90 text-sm rounded-full py-1.5 pl-4 pr-9 focus:outline-none focus:ring-2 focus:ring-brand text-white w-48 md:w-60 border border-slate-700 placeholder-slate-400">
                     <i class="fa-solid fa-search absolute right-3 top-2.5 text-slate-400 text-xs"></i>
                 </div>
 
@@ -108,7 +116,7 @@
 
         <div class="flex lg:hidden overflow-x-auto no-scrollbar px-4 py-2 bg-slate-900/95 border-t border-slate-800/80 gap-2">
             <button @click="switchTab('all')" :class="activeTab === 'all' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-300'" class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">全部</button>
-            <button @click="switchTab('anime')" :class="activeTab === 'anime' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-300'" class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-film mr-1"></i>動畫影片</button>
+            <button @click="switchTab('anime')" :class="activeTab === 'anime' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-300'" class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-film mr-1"></i>動畫與影音</button>
             <button @click="switchTab('game')" :class="activeTab === 'game' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300'" class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-gamepad mr-1"></i>前端小遊戲</button>
             <button @click="switchTab('vr')" :class="activeTab === 'vr' ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-300'" class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-vr-cardboard mr-1"></i>虛擬實境</button>
             <button @click="switchTab('music')" :class="activeTab === 'music' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300'" class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"><i class="fa-solid fa-music mr-1"></i>音樂</button>
@@ -204,7 +212,7 @@
                                 <i class="fa-solid fa-table"></i> {{ webAppUrl ? 'Google Sheets 同步' : '尚未連線' }}
                             </span>
                         </div>
-                        <p class="text-xs text-slate-400 mb-5">歡迎留下您對動畫、小遊戲或虛擬實境的心得建議！留言會寫入 Google 試算表並顯示於右側。</p>
+                        <p class="text-xs text-slate-400 mb-5">歡迎留下您對動畫與影音、小遊戲、虛擬實境或音樂的心得建議！留言會寫入 Google 試算表並顯示於右側。</p>
 
                         <form @submit.prevent="submitComment" class="space-y-4">
                             <div>
@@ -215,7 +223,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-300 mb-1">討論分區</label>
                                     <select v-model="commentForm.category" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand">
-                                        <option value="動畫影片">🎬 動畫影片</option>
+                                        <option value="動畫影片">🎬 動畫與影音</option>
                                         <option value="前端小遊戲">🎮 前端小遊戲</option>
                                         <option value="虛擬實境">🥽 虛擬實境</option>
                                         <option value="音樂">🎵 音樂</option>
@@ -252,7 +260,7 @@
                             <h4 class="font-bold text-slate-200">最新訪客留言 ({{ comments.length }})</h4>
                             <div class="flex gap-1.5 text-xs">
                                 <button @click="commentFilter = 'all'" :class="commentFilter === 'all' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400'" class="px-2.5 py-1 rounded-lg font-medium">全部</button>
-                                <button @click="commentFilter = '動畫影片'" :class="commentFilter === '動畫影片' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400'" class="px-2.5 py-1 rounded-lg font-medium">動畫</button>
+                                <button @click="commentFilter = '動畫影片'" :class="commentFilter === '動畫影片' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400'" class="px-2.5 py-1 rounded-lg font-medium">動畫與影音</button>
                                 <button @click="commentFilter = '前端小遊戲'" :class="commentFilter === '前端小遊戲' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400'" class="px-2.5 py-1 rounded-lg font-medium">小遊戲</button>
                                 <button @click="commentFilter = '虛擬實境'" :class="commentFilter === '虛擬實境' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400'" class="px-2.5 py-1 rounded-lg font-medium">VR</button>
                                 <button @click="commentFilter = '音樂'" :class="commentFilter === '音樂' ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400'" class="px-2.5 py-1 rounded-lg font-medium">音樂</button>
@@ -293,7 +301,7 @@
             </div>
 
             <div class="grid grid-cols-4 gap-2 mb-5 bg-slate-800 p-1 rounded-xl">
-                <button :disabled="!!workForm.id" @click="workForm.category = 'anime'" :class="workForm.category === 'anime' ? 'bg-brand text-white' : 'text-slate-400 hover:text-white'" class="py-2 rounded-lg text-xs font-bold transition-all disabled:cursor-not-allowed"><i class="fa-solid fa-film mr-1"></i> 動畫</button>
+                <button :disabled="!!workForm.id" @click="workForm.category = 'anime'" :class="workForm.category === 'anime' ? 'bg-brand text-white' : 'text-slate-400 hover:text-white'" class="py-2 rounded-lg text-xs font-bold transition-all disabled:cursor-not-allowed"><i class="fa-solid fa-film mr-1"></i> 動畫與影音</button>
                 <button :disabled="!!workForm.id" @click="workForm.category = 'game'" :class="workForm.category === 'game' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'" class="py-2 rounded-lg text-xs font-bold transition-all disabled:cursor-not-allowed"><i class="fa-solid fa-gamepad mr-1"></i> 小遊戲</button>
                 <button :disabled="!!workForm.id" @click="workForm.category = 'vr'" :class="workForm.category === 'vr' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="py-2 rounded-lg text-xs font-bold transition-all disabled:cursor-not-allowed"><i class="fa-solid fa-vr-cardboard mr-1"></i> VR</button>
                 <button :disabled="!!workForm.id" @click="workForm.category = 'music'" :class="workForm.category === 'music' ? 'bg-rose-600 text-white' : 'text-slate-400 hover:text-white'" class="py-2 rounded-lg text-xs font-bold transition-all disabled:cursor-not-allowed"><i class="fa-solid fa-music mr-1"></i> 音樂</button>
@@ -324,6 +332,7 @@
                     <label class="block text-xs font-bold text-slate-300 mb-1">內容類型</label>
                     <select v-model="workForm.vrKind" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-white">
                         <option value="360video">🎞️ 360° 全景影片（如 YouTube 360 影片）</option>
+                        <option value="360image">🖼️ 360° 全景圖片（2:1 等距長方形 JPG，網址需 https）</option>
                         <option value="webxr">🥽 外部 VR 展間 / WebXR 網址</option>
                         <option value="3d">🧊 本站內建 3D 全景展示（滑鼠 / 觸控環視，非頭戴裝置 VR）</option>
                     </select>
@@ -654,23 +663,25 @@
                     <i class="fa-solid fa-vr-cardboard text-cyan-400 text-xl"></i>
                     <div class="min-w-0">
                         <h3 class="font-black text-white text-sm md:text-base truncate">{{ activeVr.title }}</h3>
-                        <p v-if="activeVrKey !== 'external'" class="text-[11px] text-slate-400">本站 3D 全景展示：按住滑鼠左鍵或手指拖曳環視，滾輪縮放（非頭戴裝置 VR）</p>
+                        <p v-if="activeVrKey === 'pano'" class="text-[11px] text-slate-400">360° 全景圖：按住滑鼠左鍵或手指拖曳環視，滾輪／雙指縮放</p>
+                        <p v-else-if="activeVrKey !== 'external'" class="text-[11px] text-slate-400">本站 3D 全景展示：按住滑鼠左鍵或手指拖曳環視，滾輪縮放（非頭戴裝置 VR）</p>
                         <p v-else class="text-[11px] text-cyan-300">{{ vrKindLabel(activeVr) }}　若視窗空白，請開啟原始作品</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <a v-if="activeVrKey === 'external' && safeHttp(activeVr.contentUrl)" :href="activeVr.contentUrl" target="_blank" rel="noopener noreferrer" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-up-right-from-square"></i> 開啟原始作品</a>
                     <button v-if="activeVrKey !== 'external'" @click="vrAutoRotate = !vrAutoRotate" :class="vrAutoRotate ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-300'" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="fa-solid fa-rotate mr-1"></i> {{ vrAutoRotate ? '自動環視：開' : '自動環視：關' }}</button>
-                    <button v-if="activeVrKey !== 'external'" @click="switchVrPresetInModal" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-700"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 切換環境</button>
+                    <button v-if="activeVrKey !== 'external' && activeVrKey !== 'pano'" @click="switchVrPresetInModal" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-700"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 切換環境</button>
                     <button @click="closeVrModal" class="text-slate-400 hover:text-white text-xl ml-2"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
             <div class="relative w-full h-[66vh] min-h-[400px] bg-black overflow-hidden flex items-center justify-center">
                 <div v-if="activeVrKey !== 'external'" ref="vrContainer" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+                <video v-else-if="isDirectVideoFile(activeVr.contentUrl) && safeHttp(activeVr.contentUrl)" :src="safeHttp(activeVr.contentUrl)" controls autoplay playsinline class="w-full h-full object-contain bg-black"></video>
                 <iframe v-else-if="embedSrc(activeVr)" :src="embedSrc(activeVr)" class="h-full border-0 bg-black" :class="embedLayout(activeVr) === 'vertical' ? 'vp-iframe-v' : 'w-full'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking; fullscreen" allowfullscreen></iframe>
                 <div v-else class="text-center text-slate-400"><i class="fa-solid fa-link-slash text-4xl mb-3"></i><p>此網址無法嵌入，請用右上角「開啟原始作品」。</p></div>
                 <div v-if="activeVrKey !== 'external'" class="pointer-events-none absolute inset-x-4 bottom-4 flex justify-between items-end text-xs font-mono text-cyan-300/80">
-                    <div class="bg-slate-950/70 backdrop-blur px-3 py-1.5 rounded-lg border border-cyan-500/30">MODE: 3D 全景展示 • {{ currentVrThemeName }}</div>
+                    <div class="bg-slate-950/70 backdrop-blur px-3 py-1.5 rounded-lg border border-cyan-500/30">{{ activeVrKey === 'pano' ? 'MODE: 360° 全景圖' : 'MODE: 3D 全景展示 • ' + currentVrThemeName }}</div>
                     <div class="bg-slate-950/70 backdrop-blur px-3 py-1.5 rounded-lg border border-cyan-500/30 hidden sm:block">DRAG TO LOOK AROUND</div>
                 </div>
             </div>
@@ -821,6 +832,8 @@
 
     const vrKindLabel = (w) => {
         if (builtinKey(w.contentUrl)) return '3D 全景展示（非頭戴裝置 VR）';
+        if (baseSubtype(w) === 'video') return 'VR 實錄影片';
+        if (baseSubtype(w) === '360image') return '360° 全景圖';
         if (baseSubtype(w) === '360video') return '360° 全景影片';
         if (baseSubtype(w) === 'webxr') return '外部 VR 展間 / WebXR';
         return platformLabel(detectPlatform(w.contentUrl));
@@ -1049,7 +1062,7 @@
             };
 
             const SECTIONS = [
-                { key: 'anime', title: '動畫影片專區', tagText: '支援 YouTube / IG / FB / MP4', tag: 'bg-brand/20 text-brand-light border-brand/30', bar: 'bg-brand', desc: '貼上已發布於 YouTube、Instagram、Facebook 或 MP4 的網址，系統自動轉換播放', addText: '新增動畫影片', addBtn: 'bg-brand/20 text-brand-light hover:bg-brand hover:text-white border-brand/50' },
+                { key: 'anime', title: '動畫與影音專區', tagText: '支援 YouTube / IG / FB / MP4', tag: 'bg-brand/20 text-brand-light border-brand/30', bar: 'bg-brand', desc: '貼上已發布於 YouTube、Instagram、Facebook 或 MP4 的網址，系統自動轉換播放', addText: '新增動畫與影音', addBtn: 'bg-brand/20 text-brand-light hover:bg-brand hover:text-white border-brand/50' },
                 { key: 'game', title: '前端小遊戲', tagText: 'HTML5 即點即玩', tag: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', bar: 'bg-emerald-500', desc: '本站內建小遊戲引擎，或嵌入外部 HTML5 遊戲網址', addText: '上架小遊戲', addBtn: 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-600 hover:text-white border-emerald-500/50' },
                 { key: 'vr', title: '虛擬實境展廳', tagText: '360° 影片 / WebXR / 3D 展示', tag: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30', bar: 'bg-cyan-500', desc: '360° 全景影片、外部 VR / WebXR 展間，或本站內建 3D 全景展示', addText: '新增 VR 作品', addBtn: 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-600 hover:text-white border-cyan-500/50' },
                 { key: 'music', title: '音樂聆聽區', tagText: 'MP3 線上播放', tag: 'bg-rose-500/20 text-rose-300 border-rose-500/30', bar: 'bg-rose-500', desc: '貼上 MP3 音檔網址（或 Google Drive / Dropbox 分享連結）即可在線聆聽，支援上一首 / 下一首', addText: '新增音樂', addBtn: 'bg-rose-500/20 text-rose-300 hover:bg-rose-600 hover:text-white border-rose-500/50' }
@@ -1060,7 +1073,7 @@
                 const w = works.value;
                 const c = (f) => w.filter(f).length;
                 return [
-                    { label: '動畫作品', value: c(x => x.category === 'anime'), cls: 'text-brand-light' },
+                    { label: '動畫與影音', value: c(x => x.category === 'anime'), cls: 'text-brand-light' },
                     { label: '小遊戲', value: c(x => x.category === 'game'), cls: 'text-emerald-400' },
                     { label: 'VR 作品', value: c(x => x.category === 'vr'), cls: 'text-cyan-400' },
                     { label: '音樂', value: c(x => x.category === 'music'), cls: 'text-rose-400' },
@@ -1077,7 +1090,7 @@
                 if (t === 'music') return { badge: '音樂 MP3', badgeClass: 'bg-rose-500 text-white', title: '音樂聆聽區', desc: '戴上耳機，在線聆聽收錄的音樂作品。', bg: HOME_HERO_BG, home: true, pos: 'center 55%', btnText: '聆聽最新音樂', btnIcon: 'fa-solid fa-music', item: pool('music')[0] || null };
                 if (t === 'game') return { badge: 'HTML5 即點即玩', badgeClass: 'bg-emerald-500 text-slate-950', title: '前端互動小遊戲', desc: '無須下載安裝，直接在瀏覽器遊玩。', bg: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2070&auto=format&fit=crop', btnText: '立即遊玩最新作品', btnIcon: 'fa-solid fa-gamepad', item: pool('game')[0] || null };
                 if (t === 'vr') return { badge: '虛擬實境', badgeClass: 'bg-cyan-400 text-slate-950', title: '虛擬實境展廳', desc: '360° 全景影片、外部 VR / WebXR 展間與 3D 全景展示。', bg: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2070&auto=format&fit=crop', btnText: '進入最新作品', btnIcon: 'fa-solid fa-vr-cardboard', item: pool('vr')[0] || null };
-                if (t === 'anime') return { badge: '動畫影片', badgeClass: 'bg-brand text-white', title: '動畫影片專區', desc: '收錄已發布於各大平台的動畫作品，點擊即可觀看。', bg: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070&auto=format&fit=crop', btnText: '觀看最新動畫', btnIcon: 'fa-solid fa-play', item: pool('anime')[0] || null };
+                if (t === 'anime') return { badge: '動畫與影音', badgeClass: 'bg-brand text-white', title: '動畫與影音專區', desc: '收錄動畫與影音作品，點擊即可觀看。', bg: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070&auto=format&fit=crop', btnText: '觀看最新作品', btnIcon: 'fa-solid fa-play', item: pool('anime')[0] || null };
                 const all = works.value.filter(w => isAdmin.value || w.status === 'published').sort((a, b) => b.createdAt - a.createdAt);
                 return { badge: '多媒體互動平台', badgeClass: 'bg-brand text-white', title: 'Coder之影音沉浸世界', desc: '動畫影片、HTML5 前端小遊戲、虛擬實境與音樂作品集中展示，歡迎留言交流。', bg: HOME_HERO_BG, home: true, pos: 'center 55%', btnText: '查看最新作品', btnIcon: 'fa-solid fa-play', item: all[0] || null };
             });
@@ -1366,7 +1379,7 @@
 
             /* ---------- VR（Three.js 3D 全景展示） ---------- */
             const activeVr = ref(null);
-            const activeVrKey = computed(() => { const k = activeVr.value ? builtinKey(activeVr.value.contentUrl) : ''; return ['cyber_city', 'magic_forest', 'space_station'].includes(k) ? k : 'external'; });
+            const activeVrKey = computed(() => { if (activeVr.value && baseSubtype(activeVr.value) === '360image') return 'pano'; const k = activeVr.value ? builtinKey(activeVr.value.contentUrl) : ''; return ['cyber_city', 'magic_forest', 'space_station'].includes(k) ? k : 'external'; });
             const vrContainer = ref(null);
             const vrAutoRotate = ref(true);
             const currentVrPreset = ref('cyber_city');
@@ -1435,6 +1448,21 @@
                     vrScene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7 })));
                 }
             };
+            // 360° 全景圖：把等距長方形(2:1)圖片貼在球體內側，鏡頭放在球心
+            const buildPanoScene = (url) => {
+                if (!vrScene) return;
+                while (vrScene.children.length > 0) vrScene.remove(vrScene.children[0]);
+                vrScene.fog = null; vrObjects = [];
+                vrScene.background = new THREE.Color(0x000000);
+                const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous');
+                loader.load(url, (tex) => {
+                    if (!vrScene) return;
+                    if (THREE.sRGBEncoding) tex.encoding = THREE.sRGBEncoding;
+                    tex.anisotropy = vrRenderer ? Math.min(8, vrRenderer.capabilities.getMaxAnisotropy()) : 1;
+                    const geo = new THREE.SphereGeometry(500, 64, 40); geo.scale(-1, 1, 1);
+                    vrScene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex })));
+                }, undefined, () => showToast('全景圖載入失敗，請確認圖片網址（外部圖片需允許跨網域讀取）', 'error'));
+            };
             const initThreeVr = () => {
                 const container = vrContainer.value; if (!container) return;
                 if (typeof THREE === 'undefined') { showToast('Three.js 載入失敗，無法顯示 3D 展示', 'error'); return; }
@@ -1446,7 +1474,7 @@
                 vrRenderer.setSize(container.clientWidth, container.clientHeight);
                 vrRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 container.appendChild(vrRenderer.domElement);
-                buildVrSceneContent(currentVrPreset.value);
+                if (activeVrKey.value === 'pano') buildPanoScene(activeVr.value.contentUrl); else buildVrSceneContent(currentVrPreset.value);
 
                 let dragging = false, px = 0, py = 0, lon = 0, lat = 0;
                 const pt = (e) => e.touches && e.touches[0] ? e.touches[0] : e;
@@ -1693,6 +1721,11 @@
     });
     app.component('work-card', WorkCard);
     app.mount('#app');
+
+    /* PWA：註冊 Service Worker（讓瀏覽器提供「安裝」選項；失敗不影響網站使用） */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    }
 })();
 </script>
 </body>

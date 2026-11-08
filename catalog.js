@@ -8,11 +8,14 @@
  *   contentUrl  檔案路徑（相對於 index.html，檔名請用小寫英數字與 -）
  *   thumbnail   封面圖路徑（選填）
  *   aspect      動畫影片比例：v916 直式 / h169 橫式（選填）
- *   linkOnly    true = 點擊後在新分頁開啟 contentUrl（適合無法嵌入的外部連結）
+ *   subtype     VR 專用：360image = 360° 全景圖（2:1 等距長方形 JPG）
+ *   linkOnly    true = 點擊後開啟說明視窗與外部連結（適合無法嵌入的外部連結）
  * 同一個分類中，排在越上面的越先顯示。
  */
 window.CODER_CATALOG = [
   /* ===== 動畫影片 ===== */
+  { id: 'shuang-zhu-bo', category: 'anime', title: '雙主播', platform: 'mp4', aspect: 'h169',
+    contentUrl: 'media/anime/shuang-zhu-bo.mp4', thumbnail: 'media/thumbs/shuang-zhu-bo.jpg' },
   { id: 'shen-mi-guo-du-ep01', category: 'anime', title: '神秘國度EP01', platform: 'mp4', aspect: 'v916',
     contentUrl: 'media/anime/shen-mi-guo-du-ep01.mp4', thumbnail: 'media/thumbs/shen-mi-guo-du-ep01.jpg' },
   { id: 'wo-xiang-fei', category: 'anime', title: '我想飛', platform: 'mp4', aspect: 'v916',
@@ -26,11 +29,13 @@ window.CODER_CATALOG = [
   { id: 'tennis', category: 'game', title: '網球小遊戲', description: '3D 黑貓網球挑戰賽', platform: 'web',
     contentUrl: 'games/tennis/index.html', thumbnail: 'media/thumbs/tennis.jpg' },
 
-  /* ===== 虛擬實境（linkOnly = 點擊後在新分頁開啟外部連結，不嵌入） ===== */
-  { id: 'ling-yang-xia-gu', category: 'vr', title: '羚羊峽谷', platform: 'web', subtype: 'webxr', linkOnly: true, linkLabel: 'Makar VR',
-    description: '點擊後會嘗試開啟 Makar App 播放（建議用手機，並已安裝 Makar App）。',
-    contentUrl: 'https://ssl-api-makar-v3-apps.miflyservice.com/Makar/deeplink?projectId=38868391-2a79-4546-8e22-ae883df86180&projectType=vr&url=mifly%3A%2F%2Fmakar%2F%3Fopenpage%3DProjectPlayPage',
-    thumbnail: 'media/thumbs/ling-yang-xia-gu.jpg' },
+  /* ===== 虛擬實境（subtype: 'video' = VR 實錄影片；'360image' = 360° 全景圖） ===== */
+  { id: 'liu-huang-shan', category: 'vr', title: '硫磺山', platform: 'mp4', subtype: 'video',
+    description: 'VR 作品實錄：硫磺山。',
+    contentUrl: 'media/vr/liu-huang-shan.mp4', thumbnail: 'media/thumbs/liu-huang-shan.jpg' },
+  { id: 'ling-yang-xia-gu', category: 'vr', title: '羚羊峽谷', platform: 'mp4', subtype: 'video',
+    description: 'Makar VR 作品實錄：羚羊峽谷與恐龍。',
+    contentUrl: 'media/vr/ling-yang-xia-gu.mp4', thumbnail: 'media/thumbs/ling-yang-xia-gu.jpg' },
 
   /* ===== 音樂（MV 影片，1:1） ===== */
   { id: 'xin-zheng-sheng-kai-zhe-hua', category: 'music', title: '心正盛開著花', platform: 'mp4',
