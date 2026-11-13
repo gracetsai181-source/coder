@@ -253,6 +253,17 @@
                             </button>
                             <p v-if="!webAppUrl" class="text-[11px] text-amber-300">網站尚未連接資料庫，暫時無法留言。</p>
                         </form>
+                        <div class="mt-5 pt-5 border-t border-slate-800">
+                            <h4 class="font-bold text-sm text-slate-200 mb-3 flex items-center gap-2"><i class="fa-solid fa-headset text-emerald-400"></i> 聯絡我們</h4>
+                            <div class="flex items-center gap-4">
+                                <img src="media/line-qr.png" alt="LINE 官方帳號 QR Code" class="w-28 h-28 rounded-xl bg-white p-1.5 shrink-0">
+                                <div class="text-xs text-slate-300 leading-relaxed">
+                                    <div class="font-bold text-emerald-300 text-sm mb-1"><i class="fa-brands fa-line mr-1.5"></i>LINE 官方帳號</div>
+                                    coder AI 助手<br>ID：@607cqjuy
+                                    <a href="https://line.me/R/ti/p/%40607cqjuy" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-full text-xs font-bold"><i class="fa-brands fa-line"></i> 加入好友</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="lg:col-span-7 flex flex-col">
@@ -686,6 +697,14 @@
                 </div>
             </div>
             <div v-if="activeVr.description" class="px-5 py-3 text-xs text-slate-400 border-t border-slate-800 break-words">{{ activeVr.description }}</div>
+            <div v-if="safeHttp(activeVr.makarQr)" class="px-5 py-4 border-t border-slate-800 flex flex-wrap items-center gap-4">
+                <img :src="safeHttp(activeVr.makarQr)" alt="Makar App QR Code" class="w-28 h-28 rounded-xl bg-white p-1.5 shrink-0">
+                <div class="flex-1 min-w-[200px] text-xs text-slate-300 leading-relaxed">
+                    <div class="font-bold text-cyan-300 text-sm mb-1"><i class="fa-solid fa-mobile-screen-button mr-1.5"></i>用手機 Makar App 體驗 VR</div>
+                    開啟手機的 Makar App，掃描左側 QR Code，即可在手機上觀看《{{ activeVr.title }}》的 VR 內容。
+                    <div class="text-slate-500 mt-1">需先在手機安裝 Makar App。</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -810,7 +829,7 @@
     const toAbs = (u) => { try { return new URL(u, document.baseURI).href; } catch (e) { return ''; } };
     const CATALOG = (Array.isArray(window.CODER_CATALOG) ? window.CODER_CATALOG : []).map((w, i, arr) => Object.assign(
         { status: 'published', platform: 'web', subtype: '', aspect: '', embedUrl: '', description: '', thumbnail: '' }, w,
-        { id: 'preset-' + w.id, fixed: true, contentUrl: toAbs(w.contentUrl), thumbnail: w.thumbnail ? toAbs(w.thumbnail) : '',
+        { id: 'preset-' + w.id, fixed: true, contentUrl: toAbs(w.contentUrl), thumbnail: w.thumbnail ? toAbs(w.thumbnail) : '', makarQr: w.makarQr ? toAbs(w.makarQr) : '',
           createdAt: Date.parse('2026-01-01') + (arr.length - i) * 1000 }));
     const withCatalog = (list) => CATALOG.concat((list || []).filter(w => !String(w.id).startsWith('preset-')));
     const embedSrc = (w) => safeHttps(w && w.embedUrl) || safeHttps(getEmbedUrl(w && w.contentUrl));
@@ -1178,7 +1197,6 @@
                 } else contentUrl = f.contentUrl.trim();
 
                 const aspect = (!builtinKey(contentUrl) && f.category !== 'music' && ASPECTS.includes(f.aspect)) ? f.aspect : '';
-                if (aspect) subtype = subtype + '@' + aspect;   // 備援：把比例也記在 subtype 後面
 
                 if (!builtinKey(contentUrl) && !safeHttp(contentUrl)) return showToast('請貼上有效的作品網址（需以 http:// 或 https:// 開頭）', 'error');
                 const thumbIn = f.thumbnail.trim();

@@ -9,6 +9,7 @@
  *   thumbnail   封面圖路徑（選填）
  *   aspect      動畫影片比例：v916 直式 / h169 橫式（選填）
  *   subtype     VR 專用：360image = 360° 全景圖（2:1 等距長方形 JPG）
+ *   makarQr     VR 專用：Makar App 的 QR Code 圖片路徑（顯示在 VR 視窗下方）
  *   linkOnly    true = 點擊後開啟說明視窗與外部連結（適合無法嵌入的外部連結）
  * 同一個分類中，排在越上面的越先顯示。
  */
@@ -32,10 +33,12 @@ window.CODER_CATALOG = [
   /* ===== 虛擬實境（subtype: 'video' = VR 實錄影片；'360image' = 360° 全景圖） ===== */
   { id: 'liu-huang-shan', category: 'vr', title: '硫磺山', platform: 'mp4', subtype: 'video',
     description: 'VR 作品實錄：硫磺山。',
-    contentUrl: 'media/vr/liu-huang-shan.mp4', thumbnail: 'media/thumbs/liu-huang-shan.jpg' },
+    contentUrl: 'media/vr/liu-huang-shan.mp4', thumbnail: 'media/thumbs/liu-huang-shan.jpg',
+    makarQr: 'media/qr/liu-huang-shan-makar.png' },
   { id: 'ling-yang-xia-gu', category: 'vr', title: '羚羊峽谷', platform: 'mp4', subtype: 'video',
     description: 'Makar VR 作品實錄：羚羊峽谷與恐龍。',
-    contentUrl: 'media/vr/ling-yang-xia-gu.mp4', thumbnail: 'media/thumbs/ling-yang-xia-gu.jpg' },
+    contentUrl: 'media/vr/ling-yang-xia-gu.mp4', thumbnail: 'media/thumbs/ling-yang-xia-gu.jpg',
+    makarQr: 'media/qr/ling-yang-xia-gu-makar.png' },
 
   /* ===== 音樂（MV 影片，1:1） ===== */
   { id: 'xin-zheng-sheng-kai-zhe-hua', category: 'music', title: '心正盛開著花', platform: 'mp4',
