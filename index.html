@@ -379,8 +379,9 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1">封面圖片網址（選填）</label>
-                    <input v-model="workForm.thumbnail" @input="thumbTouched = true" type="text" placeholder="YouTube 會自動帶入；Instagram / Facebook 請自行貼上圖片網址" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand">
-                    <img v-if="safeHttp(workForm.thumbnail)" :src="workForm.thumbnail" class="mt-2 h-20 rounded-lg border border-slate-700 object-cover" alt="封面預覽" @error="$event.target.style.display='none'" @load="$event.target.style.display='block'">
+                    <input v-model="workForm.thumbnail" @input="thumbTouched = true; thumbFail = false" type="text" placeholder="貼上圖片網址（YouTube 會自動帶入；雲端硬碟 / Dropbox / GitHub 分享連結會自動轉換）" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand">
+                    <img v-if="imgUrl(workForm.thumbnail)" :src="imgUrl(workForm.thumbnail)" referrerpolicy="no-referrer" class="mt-2 h-20 rounded-lg border border-slate-700 object-cover" alt="封面預覽" @error="thumbFail = true; $event.target.style.display='none'" @load="thumbFail = false; $event.target.style.display='block'">
+                    <p v-if="thumbFail" class="text-[11px] text-amber-300 mt-1">這個網址無法顯示成圖片。請確認：① 是「圖片的直接網址」（通常結尾是 .jpg / .png），不是貼文或網頁網址（Instagram / Facebook 貼文網址不是圖片網址）；② 雲端硬碟已設為「知道連結的人都能檢視」；③ 網址是 https 開頭。</p>
                 </div>
 
                 <div>
@@ -553,7 +554,7 @@
         <button @click="closeLinkModal" class="fixed top-4 right-5 text-white hover:text-cyan-300 text-3xl transition-colors z-10" aria-label="關閉"><i class="fa-solid fa-xmark"></i></button>
         <div class="min-h-full flex items-center justify-center px-4 pt-14 pb-8" @click.self="closeLinkModal">
             <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden text-white">
-                <img v-if="safeHttp(activeLink.thumbnail)" :src="safeHttp(activeLink.thumbnail)" :alt="activeLink.title" referrerpolicy="no-referrer" class="w-full aspect-video object-cover" @error="$event.target.style.display='none'">
+                <img v-if="imgUrl(activeLink.thumbnail)" :src="imgUrl(activeLink.thumbnail)" :alt="activeLink.title" referrerpolicy="no-referrer" class="w-full aspect-video object-cover" @error="$event.target.style.display='none'">
                 <div class="p-5 space-y-3">
                     <div>
                         <div class="text-[11px] text-cyan-300 font-bold mb-1"><i class="fa-solid fa-vr-cardboard mr-1"></i>{{ activeLink.linkLabel || '外部連結' }}</div>
@@ -579,10 +580,10 @@
                 <div v-if="musicMode(activeMusic) === 'embed'" class="aspect-video bg-black">
                     <iframe v-if="embedSrc(activeMusic)" :src="embedSrc(activeMusic)" class="w-full h-full border-0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
                 </div>
-                <video v-else-if="musicMode(activeMusic) === 'video'" :key="activeMusic.id" :src="safeHttp(activeMusic.contentUrl)" :poster="safeHttp(activeMusic.thumbnail)" controls autoplay playsinline class="w-full aspect-square bg-black object-contain" @ended="onMusicEnded" @error="musicError = true"></video>
+                <video v-else-if="musicMode(activeMusic) === 'video'" :key="activeMusic.id" :src="safeHttp(activeMusic.contentUrl)" :poster="imgUrl(activeMusic.thumbnail)" controls autoplay playsinline class="w-full aspect-square bg-black object-contain" @ended="onMusicEnded" @error="musicError = true"></video>
                 <div v-else class="relative aspect-square bg-gradient-to-br from-slate-800 to-rose-700/40 flex items-center justify-center overflow-hidden">
                     <i class="fa-solid fa-music text-7xl text-white/20"></i>
-                    <img v-if="safeHttp(activeMusic.thumbnail)" :src="safeHttp(activeMusic.thumbnail)" :alt="activeMusic.title" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" @error="$event.target.style.display='none'">
+                    <img v-if="imgUrl(activeMusic.thumbnail)" :src="imgUrl(activeMusic.thumbnail)" :alt="activeMusic.title" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" @error="$event.target.style.display='none'">
                 </div>
                 <div class="p-5 text-white space-y-3">
                     <div>
@@ -741,6 +742,20 @@
     const GA_RE = /^G-[A-Z0-9]{4,}$/;
 
     const safeHttp = (u) => (typeof u === 'string' && /^https?:\/\/\S+$/i.test(u.trim())) ? u.trim() : '';
+
+    /* 封面圖網址整理：把常見的「分享連結」轉成可以直接顯示的圖片網址
+       Google 雲端硬碟（需設為「知道連結的人都能檢視」）、Dropbox、GitHub 檔案頁、Imgur 頁面 */
+    const imgUrl = (u) => {
+        const t = safeHttp(u); if (!t) return '';
+        const d = t.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=|thumbnail\?(?:[^#]*&)?id=)([\w-]+)/i);
+        if (d) return `https://drive.google.com/thumbnail?id=${d[1]}&sz=w1200`;
+        if (/(^|\/\/|\.)dropbox\.com\//i.test(t)) { try { const x = new URL(t); x.hostname = 'dl.dropboxusercontent.com'; x.searchParams.delete('dl'); return x.toString(); } catch (e) { return t; } }
+        const g = t.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i);
+        if (g) return `https://raw.githubusercontent.com/${g[1]}/${g[2]}/${g[3].split('?')[0]}`;
+        const im = t.match(/^https?:\/\/(?:www\.)?imgur\.com\/([A-Za-z0-9]{5,8})(?:[?#].*)?$/i);
+        if (im) return `https://i.imgur.com/${im[1]}.jpg`;
+        return t;
+    };
     const safeHttps = (u) => (typeof u === 'string' && /^https:\/\/\S+$/i.test(u.trim())) ? u.trim() : '';
     const builtinKey = (u) => (typeof u === 'string' && u.indexOf('builtin:') === 0) ? u.slice(8) : '';
 
@@ -839,7 +854,7 @@
     const audioSrc = (u) => {
         const t = String(u || '').trim();
         const d = driveFileId(t);
-        if (d) return `https://drive.google.com/uc?export=download&id=${d}`;
+        if (d) return `https://drive.usercontent.google.com/download?id=${d}&export=download&confirm=t`;   // Google 雲端硬碟的直接下載網址（檔案需設為「知道連結的人都能檢視」）
         if (/(^|\/\/|\.)dropbox\.com\//i.test(t)) {
             try { const x = new URL(t); x.hostname = 'dl.dropboxusercontent.com'; x.searchParams.delete('dl'); return safeHttps(x.toString()); } catch (e) { return ''; }
         }
@@ -891,7 +906,7 @@
                 if (w.category === 'game') return builtinKey(w.contentUrl) ? '內建遊戲' : platformLabel(detectPlatform(w.contentUrl));
                 return platformLabel(detectPlatform(w.contentUrl));
             });
-            const thumb = computed(() => safeHttp(props.work.thumbnail));
+            const thumb = computed(() => imgUrl(props.work.thumbnail));
             const dateText = computed(() => { if (props.work.fixed) return ''; const d = new Date(props.work.createdAt); return isNaN(d.getTime()) ? '' : `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; });
             return { t, badge, thumb, dateText };
         },
@@ -1152,6 +1167,7 @@
             const showWorkModal = ref(false);
             const savingWork = ref(false);
             const thumbTouched = ref(false);
+            const thumbFail = ref(false);
             const blankForm = () => ({ id: '', category: 'anime', title: '', description: '', thumbnail: '', contentUrl: '', status: 'published', gameSource: 'external', builtinKey: 'star_catcher', vrKind: '360video', vrPreset: 'cyber_city', aspect: 'auto' });
             const workForm = ref(blankForm());
             const needsUrl = computed(() => {
@@ -1205,7 +1221,7 @@
                 const platform = detectPlatform(contentUrl);
                 const payload = {
                     id: f.id, category: f.category, title: f.title.trim(), description: f.description.trim(),
-                    thumbnail: thumbIn || (yt ? `https://img.youtube.com/vi/${yt}/hqdefault.jpg` : ''),
+                    thumbnail: imgUrl(thumbIn) || (yt ? `https://img.youtube.com/vi/${yt}/hqdefault.jpg` : ''),
                     platform, contentUrl, embedUrl: platform === 'builtin' ? '' : (safeHttps(getEmbedUrl(contentUrl))),
                     status: f.status, subtype, aspect
                 };
@@ -1724,6 +1740,7 @@
                 showWorkModal, savingWork, workForm, needsUrl, thumbTouched, openWorkModal, onUrlInput, saveWork, toggleStatus, askDelete,
                 activeVideo, openVideoPlayer, closeVideoPlayer,
                 moveWork, activeLink, hasQr, closeLinkModal,
+                thumbFail, imgUrl,
                 activeMusic, musicError, musicList, musicIndex, openMusicPlayer, closeMusicPlayer, musicStep, onMusicEnded,
                 activeGame, activeGameKey, currentScore, highScores, gameCanvas, closeGameModal, restartMiniGame,
                 handleCanvasMouseMove, handleCanvasTouchMove, memoryCards, flipMemoryCard, memoryGameWon, bossState, attackBoss,
