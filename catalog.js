@@ -38,7 +38,7 @@ window.CODER_CATALOG = [
   { id: 'ling-yang-xia-gu', category: 'vr', title: '羚羊峽谷', platform: 'mp4', subtype: 'video',
     description: 'Makar VR 作品實錄：羚羊峽谷與恐龍。',
     contentUrl: 'media/vr/ling-yang-xia-gu.mp4', thumbnail: 'media/thumbs/ling-yang-xia-gu.jpg',
-    makarQr: 'media/qr/ling-yang-xia-gu-makar.png' },
+    makarQr: 'media/qr/ling-yang-xia-gu-makar-v2.png' },
 
   /* ===== 音樂（MV 影片，1:1） ===== */
   { id: 'xin-zheng-sheng-kai-zhe-hua', category: 'music', title: '心正盛開著花', platform: 'mp4',
@@ -48,3 +48,11 @@ window.CODER_CATALOG = [
   { id: 'hua-ban-luo-xia-de-shi-hou', category: 'music', title: '花瓣落下的時候', platform: 'mp4',
     contentUrl: 'media/music/hua-ban-luo-xia-de-shi-hou.mp4', thumbnail: 'media/thumbs/hua-ban-luo-xia-de-shi-hou.jpg' }
 ];
+
+/* 開站介紹影片：打開網站時自動彈出（同一次瀏覽只彈一次；訪客可勾選「今天不再自動顯示」）。
+ * enabled: false 即可關閉；想換影片，把新檔案放進 media/intro/ 並改下面的檔名。 */
+window.CODER_INTRO = {
+  enabled: true,
+  video: 'media/intro/coder-intro.mp4',
+  poster: 'media/intro/coder-intro.jpg'
+};

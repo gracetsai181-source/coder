@@ -61,7 +61,8 @@
             .vp-wide     { width: min(100%, 1200px, calc(72dvh * 16 / 9)); }
         }
         .vp-info-wide { max-width: 1200px; }
-        .vp-iframe-v { aspect-ratio: 9 / 16; max-width: 100%; }  /* 小遊戲 / VR 視窗內的直式嵌入 */
+        .vp-iframe-v { aspect-ratio: 9 / 16; max-width: 100%; }
+        .qr-crisp { image-rendering: pixelated; image-rendering: -moz-crisp-edges; }  /* QR Code 放大後仍保持清晰，方便手機掃描 */  /* 小遊戲 / VR 視窗內的直式嵌入 */
     </style>
 </head>
 <body class="antialiased selection:bg-brand selection:text-white">
@@ -142,6 +143,9 @@
                         </button>
                         <button v-if="isAdmin" @click="openWorkModal(activeTab === 'all' ? 'anime' : activeTab)" class="bg-brand/90 hover:bg-brand text-white px-5 py-2.5 rounded-full font-bold text-sm md:text-base transition-all flex items-center gap-2 shadow-lg shadow-brand/30">
                             <i class="fa-solid fa-cloud-arrow-up"></i> 新增作品
+                        </button>
+                        <button v-if="introAvail" @click="openIntro(true)" class="bg-slate-800/70 backdrop-blur border border-slate-600 hover:bg-slate-700 px-5 py-2.5 rounded-full font-bold text-sm md:text-base transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-circle-play text-cyan-300"></i> 網站介紹
                         </button>
                         <button @click="scrollToGuestbook" class="bg-slate-800/70 backdrop-blur border border-slate-600 hover:bg-slate-700 px-5 py-2.5 rounded-full font-bold text-sm md:text-base transition-colors flex items-center gap-2">
                             <i class="fa-solid fa-pen-to-square text-amber-400"></i> 訪客留言
@@ -526,6 +530,33 @@
         </div>
     </div>
 
+    <!-- ============ 開站介紹影片 ============ -->
+    <div v-if="showIntro" class="fixed inset-0 z-[95] bg-black/90 backdrop-blur-md overflow-y-auto" role="dialog" aria-modal="true" aria-label="CODER 網站介紹">
+        <div class="min-h-full flex items-center justify-center px-3 py-6" @click.self="closeIntro">
+            <div class="w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+                    <div class="flex items-center gap-2 font-bold text-white text-sm md:text-base"><i class="fa-solid fa-circle-play text-brand"></i> 歡迎來到 CODER 之影音沉浸世界</div>
+                    <button @click="closeIntro" class="text-slate-400 hover:text-white text-xl" aria-label="關閉"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="relative aspect-video bg-black">
+                    <video ref="introEl" :src="introSrc" :poster="introPoster" autoplay muted playsinline controls preload="auto" class="w-full h-full object-contain bg-black" @volumechange="onIntroVolume" @ended="introEnded = true"></video>
+                    <button v-if="introMuted && !introEnded" @click="unmuteIntro" class="absolute top-3 right-3 bg-black/70 hover:bg-black/90 text-white text-xs md:text-sm font-bold px-3.5 py-2 rounded-full border border-white/20 flex items-center gap-2"><i class="fa-solid fa-volume-xmark"></i> 點擊開啟聲音</button>
+                    <div v-if="introEnded" class="absolute inset-0 bg-black/65 flex flex-col items-center justify-center gap-4 text-white px-4 text-center">
+                        <p class="font-bold text-lg md:text-2xl">現在，一起進入 CODER 吧！</p>
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <button @click="closeIntro" class="bg-brand hover:bg-brand-dark text-white px-6 py-2.5 rounded-full font-bold text-sm md:text-base">開始探索</button>
+                            <button @click="replayIntro" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white px-5 py-2.5 rounded-full font-bold text-sm md:text-base">重新播放</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+                    <label class="flex items-center gap-2 text-xs md:text-sm text-slate-300 cursor-pointer select-none"><input type="checkbox" v-model="introHideToday" class="w-4 h-4"> 今天不再自動顯示</label>
+                    <button @click="closeIntro" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white px-5 py-2 rounded-full text-sm font-bold">略過，進入網站</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ============ 動畫播放器（支援 9:16 直式 / 16:9 橫式） ============ -->
     <div v-if="activeVideo" class="fixed inset-0 bg-black/95 z-[60] overflow-y-auto backdrop-blur-md">
         <button @click="closeVideoPlayer" class="fixed top-4 right-5 text-white hover:text-brand text-3xl transition-colors z-10"><i class="fa-solid fa-xmark"></i></button>
@@ -667,6 +698,12 @@
         </div>
     </div>
 
+    <!-- ============ Makar QR Code 放大 ============ -->
+    <div v-if="qrZoom && activeVr && safeHttp(activeVr.makarQr)" class="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 cursor-zoom-out" @click="qrZoom = false">
+        <img :src="safeHttp(activeVr.makarQr)" alt="Makar App QR Code" class="qr-crisp bg-white p-3 rounded-2xl" style="width: min(92vw, 520px); height: auto;">
+        <p class="text-slate-300 text-sm mt-4">用 Makar App 掃描｜點擊任意處關閉</p>
+    </div>
+
     <!-- ============ VR 視窗 ============ -->
     <div v-if="activeVr" class="fixed inset-0 bg-black/95 z-[60] flex flex-col items-center justify-center p-3 md:p-8 backdrop-blur-md">
         <div class="w-full max-w-5xl bg-slate-900 border border-cyan-500/40 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
@@ -699,11 +736,11 @@
             </div>
             <div v-if="activeVr.description" class="px-5 py-3 text-xs text-slate-400 border-t border-slate-800 break-words">{{ activeVr.description }}</div>
             <div v-if="safeHttp(activeVr.makarQr)" class="px-5 py-4 border-t border-slate-800 flex flex-wrap items-center gap-4">
-                <img :src="safeHttp(activeVr.makarQr)" alt="Makar App QR Code" class="w-28 h-28 rounded-xl bg-white p-1.5 shrink-0">
+                <img :src="safeHttp(activeVr.makarQr)" alt="Makar App QR Code（點擊放大）" @click="qrZoom = true" class="qr-crisp w-64 h-64 max-w-full rounded-xl bg-white p-2 shrink-0 cursor-zoom-in">
                 <div class="flex-1 min-w-[200px] text-xs text-slate-300 leading-relaxed">
                     <div class="font-bold text-cyan-300 text-sm mb-1"><i class="fa-solid fa-mobile-screen-button mr-1.5"></i>用手機 Makar App 體驗 VR</div>
-                    開啟手機的 Makar App，掃描左側 QR Code，即可在手機上觀看《{{ activeVr.title }}》的 VR 內容。
-                    <div class="text-slate-500 mt-1">需先在手機安裝 Makar App。</div>
+                    開啟手機的 Makar App，掃描這個 QR Code，即可在手機上觀看《{{ activeVr.title }}》的 VR 內容。
+                    <div class="text-slate-500 mt-1">需先在手機安裝 Makar App。點擊 QR Code 可放大，用電腦螢幕掃描會更容易成功。若掃描後沒有顯示作品，請先觀看上方錄影。</div>
                 </div>
             </div>
         </div>
@@ -1430,6 +1467,7 @@
                 if (activeVrKey.value !== 'external') initThreeVr();
             };
             const closeVrModal = () => {
+                qrZoom.value = false;
                 if (vrAnimId) cancelAnimationFrame(vrAnimId);
                 if (vrCleanup) { vrCleanup(); vrCleanup = null; }
                 if (vrRenderer) { vrRenderer.dispose(); vrRenderer = null; }
@@ -1711,11 +1749,45 @@
             };
 
             /* ---------- 啟動 ---------- */
+            /* ---------- 開站介紹影片（設定在 catalog.js 的 CODER_INTRO） ---------- */
+            const INTRO = window.CODER_INTRO || {};
+            const introSrc = INTRO.video ? toAbs(INTRO.video) : '';
+            const introPoster = INTRO.poster ? toAbs(INTRO.poster) : '';
+            const introAvail = !!(INTRO.enabled !== false && introSrc);
+            const showIntro = ref(false), introMuted = ref(true), introEnded = ref(false), introHideToday = ref(false), introEl = ref(null), qrZoom = ref(false);
+            const INTRO_HIDE_KEY = 'coder_intro_hide_until', INTRO_SEEN_KEY = 'coder_intro_seen';
+            const openIntro = (manual) => {
+                introMuted.value = true; introEnded.value = false; showIntro.value = true; document.body.style.overflow = 'hidden';
+                trackEvent(manual ? 'intro_replay' : 'intro_popup', { content_type: 'intro_video' });
+                nextTick(() => { const v = introEl.value; if (v) { v.muted = true; v.play().catch(() => {}); } });   // 瀏覽器只允許靜音自動播放
+            };
+            const maybeShowIntro = () => {
+                if (!introAvail) return;
+                try {
+                    if (sessionStorage.getItem(INTRO_SEEN_KEY)) return;
+                    const until = Number(localStorage.getItem(INTRO_HIDE_KEY) || 0);
+                    if (until && Date.now() < until) return;
+                } catch (e) { /* 無法讀取儲存空間時，照常顯示 */ }
+                openIntro(false);
+            };
+            const closeIntro = () => {
+                try {
+                    sessionStorage.setItem(INTRO_SEEN_KEY, '1');
+                    if (introHideToday.value) localStorage.setItem(INTRO_HIDE_KEY, String(Date.now() + 24 * 3600 * 1000));
+                } catch (e) {}
+                if (introEl.value) { try { introEl.value.pause(); } catch (e) {} }
+                showIntro.value = false; document.body.style.overflow = 'auto';
+            };
+            const unmuteIntro = () => { const v = introEl.value; if (!v) return; v.muted = false; v.volume = 1; introMuted.value = false; v.play().catch(() => {}); };
+            const onIntroVolume = () => { const v = introEl.value; if (v) introMuted.value = v.muted || v.volume === 0; };
+            const replayIntro = () => { const v = introEl.value; if (v) { v.currentTime = 0; v.play().catch(() => {}); } introEnded.value = false; };
+
             onMounted(() => {
                 // 先用本機快取的 GA ID 立即啟動，之後雲端資料會再校正
                 const cachedGa = lsGet(KEY_GA);
                 if (cachedGa) loadGa(cachedGa);
                 loadAll();
+                setTimeout(maybeShowIntro, 800);
                 window.addEventListener('keydown', (e) => {
                     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); openSecretLoginModal(); return; }
                     if (activeGame.value && activeGameKey.value === 'star_catcher') {
@@ -1723,7 +1795,9 @@
                         if (e.key === 'ArrowRight') { e.preventDefault(); playerX = Math.min(532, playerX + 24); }
                     }
                     if (e.key === 'Escape') {
-                        if (confirmState.value) confirmState.value = null;
+                        if (showIntro.value) closeIntro();
+                        else if (qrZoom.value) qrZoom.value = false;
+                        else if (confirmState.value) confirmState.value = null;
                         else if (activeVideo.value) closeVideoPlayer();
                         else if (activeMusic.value) closeMusicPlayer();
                         else if (activeLink.value) closeLinkModal();
@@ -1740,6 +1814,7 @@
                 showWorkModal, savingWork, workForm, needsUrl, thumbTouched, openWorkModal, onUrlInput, saveWork, toggleStatus, askDelete,
                 activeVideo, openVideoPlayer, closeVideoPlayer,
                 moveWork, activeLink, hasQr, closeLinkModal,
+                introAvail, introSrc, introPoster, showIntro, introMuted, introEnded, introHideToday, introEl, qrZoom, openIntro, closeIntro, unmuteIntro, onIntroVolume, replayIntro,
                 thumbFail, imgUrl,
                 activeMusic, musicError, musicList, musicIndex, openMusicPlayer, closeMusicPlayer, musicStep, onMusicEnded,
                 activeGame, activeGameKey, currentScore, highScores, gameCanvas, closeGameModal, restartMiniGame,
